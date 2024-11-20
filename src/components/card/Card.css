@@ -1,0 +1,14 @@
+.card-item {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: white; /* Example background color */
+    text-align: center; /* Center text */
+    transform: scale(1.2);
+    transition: transform 0.5s;
+}
+
+.card-item:hover {
+    transform: scale(1.5);
+    cursor: pointer;
+}

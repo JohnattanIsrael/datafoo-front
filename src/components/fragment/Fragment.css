@@ -1,0 +1,56 @@
+.fragment {
+    position: relative;
+}
+
+.edit-cloud {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 250, 244, 0.918);
+    border-radius: 10px;
+    height: 200px;
+    transform: translateX(100%);
+    transition: transform 0.5s ease;
+}
+
+.expand-cloud {
+    display: flex;
+}
+
+.edit-cloud p {
+    color: lightgray;
+}
+
+.edit-cloud button {
+    background-color: #FFFAF4;
+    border: none;
+    cursor: pointer;
+    color: lightgray;
+    font-size: 1rem;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.hide {
+    display: none;
+}
+
+.hover-space {
+    width: 12px;
+    height: 30px;
+    position: absolute;
+    transform: translateY(100%) translateX(100%);
+    color: aliceblue;
+    border-radius: 10px;
+    right: -4px;
+    bottom: 30px;
+    transition: transform 1.5s ease, color 1.5s ease;
+}
+
+.editable {
+    cursor: pointer;
+    border: 1px solid rgba(196, 168, 219, 0.518) ;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: border 0.5s ease, box-shadow 0.5s ease;
+}

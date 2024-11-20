@@ -1,0 +1,19 @@
+#nav {
+    width: calc(100% - 400px);
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 19px;
+}
+
+.nav-item {
+    font-size: 18px;
+    font-weight: 500;
+    transition: ease-in-out 0.2s;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    font-weight: 600;
+}

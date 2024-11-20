@@ -1,0 +1,7 @@
+.draggable-div {
+    position: relative;
+    width: 200px; /* Replace 200px with your desired width */
+    height: 100px; /* Replace 100px with your desired height */
+    background-color: #ff00ff; /* Replace #ff00ff with your desired color */
+    cursor: move;
+}
