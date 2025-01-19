@@ -43,7 +43,7 @@ const ProjectFeed = () => {
         littleImageSrc={logo2}
         name='Mexico'
         location='PIMARC'
-        paragraph='PIMARC is a contruction company that I worked for as a Fullstack Developer. I was in charge of the whole tech stack and the Growth Hacking strategies. This is one of my precedents for all UX/UI and User Centered Marketing knowledge.'
+        paragraph='PIMARC is a construction company that I worked for as a Fullstack Developer. I was in charge of the whole tech stack and the Growth Hacking strategies. This is one of my precedents for all UX/UI and User Centered Marketing knowledge.'
         color='bg-gradient-to-r from-amber-400 to-amber-500'
       />
     </div>

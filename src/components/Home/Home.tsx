@@ -16,6 +16,8 @@ import Lamda from '../../assets/Lambda.svg';
 import cypress from '../../assets/cypress.svg';
 import jest from '../../assets/jest.svg';
 import Toolset from '../toolset/Toolset';
+import Nav from '../nav/Nav';
+import Editor from '../editor/Editor';
 
 const Home: React.FC = () => {
 
