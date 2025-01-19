@@ -31,6 +31,13 @@ const ProjectFeed = () => {
         littleImageSrc={hyundai}
       />
             <ProjectCard
+        image='bg-p-eye ease-in-out duration-300 hover:opacity-100'
+        name='USA and Mexico'
+        location='Code The World'
+        paragraph='Code The World is a huge project I´m currently working on. It´s a people oriented platform that promotes coding and technology to help resolve world problems.'
+        littleImageSrc={eye}
+      />
+            <ProjectCard
         image='opacity-80 ease-in-out duration-300 hover:opacity-100'
         littleImage={true}
         littleImageSrc={logo2}
@@ -39,13 +46,7 @@ const ProjectFeed = () => {
         paragraph='PIMARC is a construction company that I worked for as a Fullstack Developer. I was in charge of the whole tech stack and the Growth Hacking strategies. This is one of my precedents for all UX/UI and User Centered Marketing knowledge.'
         color='bg-gradient-to-r from-amber-400 to-amber-500'
       />
-      <ProjectCard
-        image='bg-p-eye ease-in-out duration-300 hover:opacity-100'
-        name='USA and Mexico'
-        location='Code The World'
-        paragraph='Code The World is a huge project I´m currently working on. It´s a people oriented platform that promotes coding and technology to help resolve world problems.'
-        littleImageSrc={eye}
-      />
+
 
     </div>
   )
