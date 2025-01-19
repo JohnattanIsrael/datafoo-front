@@ -1,9 +1,9 @@
 import ProjectCard from './ProjectCard';
-import logo2 from '../../assets/logo2.png'
-import vw from '../../assets/vw.png'
-import audi from '../../assets/audi.png'
-import hyundai from '../../assets/hyundai.png'
-import eye from '../../assets/eye.svg'
+import logo2 from '/assets/logo2.png'
+import vw from '/assets/vw.png'
+import audi from '/assets/audi.png'
+import hyundai from '/assets/hyundai.png'
+import eye from '/assets/eye.svg'
 
 const ProjectFeed = () => {
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import './Action.css';
-import envelope from '../../assets/envelope-regular.svg';
+import envelope from '/assets/envelope-regular.svg';
 
 const Action: React.FC = () => {
     return (

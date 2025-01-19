@@ -1,6 +1,6 @@
 import React from 'react';
 import './Logo.css';
-import eye from '../../assets/eye.svg';
+import eye from '/assets/eye.svg';
 
 const Logo: React.FC = () => {
     return (

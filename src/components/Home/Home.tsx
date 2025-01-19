@@ -3,8 +3,8 @@ import Header from '../header/Header';
 import Hero from '../hero/Hero';
 import CTA from '../cta/CTA';
 import SideFeed from '../projectFeed/SideFeed';
-import programer1 from '../../assets/program-1.svg';
-import programer2 from '../../assets/program-2.svg';
+import programer1 from '/assets/program-1.svg';
+import programer2 from '/assets/program-2.svg';
 import Footer from '../footer/Footer';
 import Feature from '../feature/Feature';
 import ContentGrid from '../grid/ContentGrid';
@@ -12,9 +12,9 @@ import HeroText from '../hero/HeroText';
 import Modal from '../Modal/Modal';
 import GridSmallCard from '../grid/GridSmallCard';
 import GridBigCard from '../grid/GridBigCard';
-import Lamda from '../../assets/Lambda.svg';
-import cypress from '../../assets/cypress.svg';
-import jest from '../../assets/jest.svg';
+import Lamda from '/assets/Lambda.svg';
+import cypress from '/assets/cypress.svg';
+import jest from '/assets/jest.svg';
 
 const Home: React.FC = () => {
 
