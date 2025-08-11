@@ -65,10 +65,22 @@ interface DataPoint {
 }
 
 /**
+ * Data structure for multiple lines on the graph
+ */
+interface LineData {
+    id: string;         // Unique identifier for the line
+    name: string;       // Display name for the line
+    data: DataPoint[];  // Data points for this line
+    color?: string;     // Color for this line (overrides default lineColor)
+    pointColor?: string; // Color for points on this line (overrides default pointColor)
+}
+
+/**
  * Configuration props for the LinearGraph component
  */
 interface LinearGraphProps {
-    data: DataPoint[];                                          // Array of data points to plot
+    data?: DataPoint[];                                         // Single line data (deprecated, use lines instead)
+    lines?: LineData[];                                         // Multiple lines data
     width?: number;                                            // Graph width in pixels (default: 600)
     height?: number;                                           // Graph height in pixels (default: 400)
     margin?: { top: number; right: number; bottom: number; left: number }; // Margins around the plot area
@@ -81,8 +93,8 @@ interface LinearGraphProps {
     customIcons?: { [key: string]: string };                  // Icon mapping: { iconKey: iconPath }
     xTickCount?: number;                                       // Number of ticks on X-axis (default: auto)
     yTickCount?: number;                                       // Number of ticks on Y-axis (default: auto)
-    xTickFormat?: (value: number) => string;                  // Custom formatter for X-axis tick labels
-    yTickFormat?: (value: number) => string;                  // Custom formatter for Y-axis tick labels
+    xTickFormat?: (value: d3.NumberValue) => string;          // Custom formatter for X-axis tick labels
+    yTickFormat?: (value: d3.NumberValue) => string;          // Custom formatter for Y-axis tick labels
     xDomain?: [number, number];                               // Custom X-axis domain [min, max] (default: auto from data)
     yDomain?: [number, number];                               // Custom Y-axis domain [min, max] (default: auto from data)
     gridOpacity?: number;                                     // Opacity of grid lines (0-1, default: 0.7)
@@ -91,6 +103,7 @@ interface LinearGraphProps {
 
 const LinearGraph: React.FC<LinearGraphProps> = ({
     data,
+    lines,
     width = 600,
     height = 400,
     margin = { top: 20, right: 30, bottom: 40, left: 50 },
@@ -113,8 +126,11 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
     const svgRef = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
+        // Determine which data to use - prioritize lines over data
+        const linesToRender: LineData[] = lines || (data ? [{ id: 'default', name: 'Default', data, color: lineColor, pointColor }] : []);
+        
         // Early return if no data provided
-        if (!data || data.length === 0) return;
+        if (linesToRender.length === 0 || linesToRender.every(line => line.data.length === 0)) return;
 
         // D3.js: Select the SVG element and clear any existing content
         const svg = d3.select(svgRef.current);
@@ -124,15 +140,18 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
+        // Flatten all data points for domain calculation
+        const allDataPoints = linesToRender.flatMap(line => line.data);
+
         // D3.js: Create linear scales to map data values to pixel coordinates
         // xScale: Maps x-data values to horizontal pixel positions (0 to innerWidth)
         const xScale = d3.scaleLinear()
-            .domain(xDomain || d3.extent(data, d => d.x) as [number, number]) // Use custom domain or auto-calculate
+            .domain(xDomain || d3.extent(allDataPoints, d => d.x) as [number, number]) // Use custom domain or auto-calculate
             .range([0, innerWidth]);
 
         // yScale: Maps y-data values to vertical pixel positions (innerHeight to 0, inverted for SVG)
         const yScale = d3.scaleLinear()
-            .domain(yDomain || d3.extent(data, d => d.y) as [number, number]) // Use custom domain or auto-calculate
+            .domain(yDomain || d3.extent(allDataPoints, d => d.y) as [number, number]) // Use custom domain or auto-calculate
             .range([innerHeight, 0]); // Inverted because SVG y=0 is at top
 
         // Create main group element with margin offset transform
@@ -173,51 +192,57 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
             .y(d => yScale(d.y))    // Map data y-value to pixel y-coordinate
             .curve(d3.curveLinear); // Use straight lines between points (no interpolation)
 
-        // DRAW THE LINE: Create SVG path element connecting all data points
-        g.append('path')
-            .datum(data)                // Bind entire dataset to single path element
-            .attr('class', 'line')      // CSS class for styling
-            .attr('d', line)            // 'd' attribute contains the SVG path data
-            .style('stroke', lineColor) // Line color
-            .style('stroke-width', 2)   // Line thickness
-            .style('fill', 'none');     // No fill, just stroke
-
-        // DATA POINTS: Create group elements for each data point
-        const points = g.selectAll('.point')
-            .data(data)                 // Bind data array
-            .enter().append('g')        // Create group for each data point
-            .attr('class', 'point')     // CSS class for styling
-            .attr('transform', d => `translate(${xScale(d.x)},${yScale(d.y)})`); // Position each point
-
-        // RENDER POINTS: Add visual elements (circles or icons) and labels to each point
-        points.each(function(d) {
-            const point = d3.select(this); // Current point group element
+        // DRAW MULTIPLE LINES: Create SVG path elements for each line
+        linesToRender.forEach((lineData) => {
+            const currentLineColor = lineData.color || lineColor;
+            const currentPointColor = lineData.pointColor || pointColor;
             
-            // Render custom icon if available, otherwise render circle
-            if (d.icon && customIcons[d.icon]) {
-                point.append('image')
-                    .attr('href', customIcons[d.icon])  // Icon image source
-                    .attr('width', pointRadius * 2)     // Icon width
-                    .attr('height', pointRadius * 2)    // Icon height
-                    .attr('x', -pointRadius)            // Center horizontally
-                    .attr('y', -pointRadius)            // Center vertically
-                    .attr('class', 'point-icon');       // CSS class for styling
-            } else {
-                // Default circle point
-                point.append('circle')
-                    .attr('r', pointRadius)             // Circle radius
-                    .attr('class', 'point-circle')      // CSS class for styling
-                    .style('fill', pointColor);         // Circle fill color
-            }
+            // Draw the line
+            g.append('path')
+                .datum(lineData.data)           // Bind line's dataset to path element
+                .attr('class', `line line-${lineData.id}`)  // CSS class for styling
+                .attr('d', line)                // 'd' attribute contains the SVG path data
+                .style('stroke', currentLineColor) // Line color
+                .style('stroke-width', 2)       // Line thickness
+                .style('fill', 'none');         // No fill, just stroke
 
-            // Add text label if provided
-            if (d.label) {
-                point.append('text')
-                    .attr('class', 'point-label')           // CSS class for styling
-                    .attr('dy', -pointRadius - 5)           // Position above the point
-                    .attr('text-anchor', 'middle')          // Center text horizontally
-                    .text(d.label);                         // Label text content
-            }
+            // DATA POINTS: Create group elements for each data point in this line
+            const points = g.selectAll(`.point-${lineData.id}`)
+                .data(lineData.data)            // Bind data array for this line
+                .enter().append('g')            // Create group for each data point
+                .attr('class', `point point-${lineData.id}`) // CSS class for styling
+                .attr('transform', d => `translate(${xScale(d.x)},${yScale(d.y)})`); // Position each point
+
+            // RENDER POINTS: Add visual elements (circles or icons) and labels to each point
+            points.each(function(d) {
+                const point = d3.select(this); // Current point group element
+                
+                // Render custom icon if available, otherwise render circle
+                if (d.icon && customIcons[d.icon]) {
+                    point.append('image')
+                        .attr('href', customIcons[d.icon])  // Icon image source
+                        .attr('width', pointRadius * 2)     // Icon width
+                        .attr('height', pointRadius * 2)    // Icon height
+                        .attr('x', -pointRadius)            // Center horizontally
+                        .attr('y', -pointRadius)            // Center vertically
+                        .attr('class', 'point-icon');       // CSS class for styling
+                } else {
+                    // Default circle point
+                    point.append('circle')
+                        .attr('r', pointRadius)             // Circle radius
+                        .attr('class', 'point-circle')      // CSS class for styling
+                        .style('fill', currentPointColor);   // Circle fill color
+                }
+
+                // Add text label if provided
+                if (d.label) {
+                    point.append('text')
+                        .attr('class', 'point-label')           // CSS class for styling
+                        .attr('dy', -pointRadius - 5)           // Position above the point
+                        .attr('text-anchor', 'middle')          // Center text horizontally
+                        .text(d.label);                         // Label text content
+                }
+            });
         });
 
         // X-AXIS: Create bottom axis with customizable ticks and formatting
@@ -261,7 +286,7 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
             .text(yAxisLabel);                 // Label text
 
         // Dependencies array: Re-run effect when these props change
-    }, [data, width, height, margin, lineColor, pointColor, pointRadius, showGrid, xAxisLabel, yAxisLabel, customIcons, xTickCount, yTickCount, xTickFormat, yTickFormat, xDomain, yDomain, gridOpacity, tickSize]);
+    }, [data, lines, width, height, margin, lineColor, pointColor, pointRadius, showGrid, xAxisLabel, yAxisLabel, customIcons, xTickCount, yTickCount, xTickFormat, yTickFormat, xDomain, yDomain, gridOpacity, tickSize]);
 
     /**
      * COMPONENT RENDER: Return the SVG container wrapped in a styled div
