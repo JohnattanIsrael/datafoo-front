@@ -1,0 +1,168 @@
+.linear-graph-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.linear-graph {
+    background-color: white;
+    border-radius: 4px;
+    overflow: visible;
+}
+
+/* Grid styling */
+.grid line {
+    stroke: #e0e0e0;
+    stroke-opacity: 0.7;
+    shape-rendering: crispEdges;
+    stroke-width: 1px;
+}
+
+.grid path {
+    stroke-width: 0;
+}
+
+/* Axes styling */
+.x-axis path,
+.y-axis path {
+    stroke: #333;
+    stroke-width: 1px;
+    fill: none;
+}
+
+.x-axis .tick line,
+.y-axis .tick line {
+    stroke: #333;
+    stroke-width: 1px;
+}
+
+.x-axis .tick text,
+.y-axis .tick text {
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    fill: #666;
+}
+
+/* Axis labels */
+.x-axis-label,
+.y-axis-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    fill: #333;
+}
+
+/* Line styling */
+.line {
+    stroke: #F9CA00;
+    stroke-width: 2px;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+/* Point styling */
+.point {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.point:hover {
+    transform: scale(1.2);
+}
+
+.point-circle {
+    fill: #183140;
+    stroke: #F9CA00;
+    stroke-width: 2px;
+    transition: all 0.3s ease;
+}
+
+.point:hover .point-circle {
+    fill: #F9CA00;
+    stroke: #183140;
+    r: 7;
+}
+
+.point-icon {
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.point:hover .point-icon {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Point labels */
+.point-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    fill: #333;
+    text-anchor: middle;
+    pointer-events: none;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.point:hover .point-label {
+    opacity: 1;
+    font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .linear-graph-container {
+        padding: 10px;
+        overflow-x: auto;
+    }
+    
+    .x-axis .tick text,
+    .y-axis .tick text {
+        font-size: 10px;
+    }
+    
+    .x-axis-label,
+    .y-axis-label {
+        font-size: 12px;
+    }
+    
+    .point-label {
+        font-size: 10px;
+    }
+}
+
+/* Animation for line drawing */
+.line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-line 2s ease-out forwards;
+}
+
+@keyframes draw-line {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Animation for points appearing */
+.point {
+    opacity: 0;
+    animation: fade-in-point 0.5s ease-out forwards;
+}
+
+.point:nth-child(1) { animation-delay: 2s; }
+.point:nth-child(2) { animation-delay: 2.1s; }
+.point:nth-child(3) { animation-delay: 2.2s; }
+.point:nth-child(4) { animation-delay: 2.3s; }
+.point:nth-child(5) { animation-delay: 2.4s; }
+
+@keyframes fade-in-point {
+    to {
+        opacity: 1;
+    }
+}
