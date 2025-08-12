@@ -136,9 +136,12 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove(); // Remove all child elements for clean re-render
 
-        // Calculate the inner dimensions (excluding margins)
-        const innerWidth = width - margin.left - margin.right;
-        const innerHeight = height - margin.top - margin.bottom;
+        // Calculate the inner dimensions (excluding margins) with safety checks
+        const innerWidth = Math.max(0, width - margin.left - margin.right);
+        const innerHeight = Math.max(0, height - margin.top - margin.bottom);
+        
+        // Early return if dimensions are too small
+        if (innerWidth <= 0 || innerHeight <= 0) return;
 
         // Flatten all data points for domain calculation
         const allDataPoints = linesToRender.flatMap(line => line.data);
