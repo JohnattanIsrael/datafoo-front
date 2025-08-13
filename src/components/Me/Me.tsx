@@ -65,6 +65,9 @@ type RechartsLineData = {
 };
 
 const Me: React.FC = () => {
+    // Dark theme state
+    const [darkTheme, setDarkTheme] = useState<boolean>(false);
+    
     // D3 LinearGraph state
     const [timePeriod, setTimePeriod] = useState<TimePeriod>('weeks');
     const [currentDataset, setCurrentDataset] = useState<string>('dataset1');
@@ -877,8 +880,9 @@ const Me: React.FC = () => {
         return data.map(point => {
             const filteredPoint: RechartsDataPoint = { x: point.x, label: point.label };
             visibleKeys.forEach(key => {
-                if (point[key as keyof RechartsDataPoint] !== undefined) {
-                    (filteredPoint as any)[key] = (point as any)[key];
+                const value = point[key as keyof RechartsDataPoint];
+                if (value !== undefined) {
+                    (filteredPoint as Record<string, unknown>)[key] = value;
                 }
             });
             return filteredPoint;
@@ -899,15 +903,28 @@ const Me: React.FC = () => {
     };
 
     return (
-        <div className='h-full w-full flex flex-col'>
+        <div className={`h-full w-full flex flex-col transition-colors duration-300 ${darkTheme ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
             <div className='top-0'>
                 <Header />
             </div>
             
             <div className="p-6">
+                {/* Dark Theme Toggle */}
+                <div className="mb-6 flex justify-end">
+                    <button
+                        onClick={() => setDarkTheme(!darkTheme)}
+                        className={`px-4 py-2 rounded font-medium transition-colors ${
+                            darkTheme
+                                ? 'bg-gray-700 text-white hover:bg-gray-600'
+                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                        }`}
+                    >
+                        {darkTheme ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                    </button>
+                </div>
                 {/* Time Period Selection */}
                 <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3">Time Period:</h3>
+                    <h3 className={`text-lg font-semibold mb-3 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Time Period:</h3>
                     <div className="flex gap-3">
                         {(['days', 'weeks', 'months'] as TimePeriod[]).map((period) => (
                             <button
@@ -916,7 +933,9 @@ const Me: React.FC = () => {
                                 className={`px-4 py-2 rounded font-medium transition-colors ${
                                     timePeriod === period
                                         ? 'bg-p-yellow text-p-dark'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : darkTheme
+                                            ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
                                 {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -927,14 +946,16 @@ const Me: React.FC = () => {
 
                 {/* Dataset Selection */}
                 <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3">Dataset:</h3>
+                    <h3 className={`text-lg font-semibold mb-3 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Dataset:</h3>
                     <div className="flex gap-3">
                         <button
                             onClick={() => setCurrentDataset('dataset1')}
                             className={`px-4 py-2 rounded font-medium transition-colors ${
                                 currentDataset === 'dataset1'
                                     ? 'bg-p-yellow text-p-dark'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    : darkTheme
+                                        ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
                             Dataset 1
@@ -944,7 +965,9 @@ const Me: React.FC = () => {
                             className={`px-4 py-2 rounded font-medium transition-colors ${
                                 currentDataset === 'dataset2'
                                     ? 'bg-p-yellow text-p-dark'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    : darkTheme
+                                        ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
                             Dataset 2
@@ -954,7 +977,7 @@ const Me: React.FC = () => {
 
                 {/* D3.js Line Visibility Controls */}
                 <div className="mb-4">
-                    <h4 className="text-md font-semibold mb-2">D3.js Visible Lines:</h4>
+                    <h4 className={`text-md font-semibold mb-2 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>D3.js Visible Lines:</h4>
                     <div className="flex gap-4 flex-wrap">
                         {getCurrentData().map((line) => (
                             <label key={line.id} className="flex items-center gap-2 cursor-pointer">
@@ -968,7 +991,7 @@ const Me: React.FC = () => {
                                     className="w-4 h-0.5" 
                                     style={{ backgroundColor: line.color }}
                                 ></div>
-                                <span className="text-sm font-medium">{line.name}</span>
+                                <span className={`text-sm font-medium ${darkTheme ? 'text-gray-200' : 'text-gray-700'}`}>{line.name}</span>
                             </label>
                         ))}
                     </div>
@@ -976,7 +999,7 @@ const Me: React.FC = () => {
 
                 {/* D3.js Linear Graph */}
                 <div className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center">D3.js Linear Graph</h2>
+                    <h2 className={`text-2xl font-bold mb-6 text-center ${darkTheme ? 'text-white' : 'text-gray-900'}`}>D3.js Linear Graph</h2>
                     <LinearGraph
                         lines={getFilteredD3Data()}
                         width={800}
@@ -987,19 +1010,20 @@ const Me: React.FC = () => {
                         xTickFormat={getTickFormat(timePeriod)}
                         yTickFormat={(d) => `${Number(d)}`}
                         showGrid={true}
+                        darkTheme={darkTheme}
                     />
                 </div>
 
                 {/* Separator */}
-                <div className="border-t border-gray-300 my-12"></div>
+                <div className={`border-t my-12 ${darkTheme ? 'border-gray-600' : 'border-gray-300'}`}></div>
 
                 {/* Recharts Section */}
                 <div className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center">Recharts Linear Graph</h2>
+                    <h2 className={`text-2xl font-bold mb-6 text-center ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Recharts Linear Graph</h2>
                     
                     {/* Recharts Time Period Selection */}
                     <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-3">Recharts Time Period:</h3>
+                        <h3 className={`text-lg font-semibold mb-3 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Recharts Time Period:</h3>
                         <div className="flex gap-3">
                             {(['days', 'weeks', 'months'] as TimePeriod[]).map((period) => (
                                 <button
@@ -1008,7 +1032,9 @@ const Me: React.FC = () => {
                                     className={`px-4 py-2 rounded font-medium transition-colors ${
                                         rechartsTimePeriod === period
                                             ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            : darkTheme
+                                                ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
                                     {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -1019,14 +1045,16 @@ const Me: React.FC = () => {
 
                     {/* Recharts Dataset Selection */}
                     <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-3">Recharts Dataset:</h3>
+                        <h3 className={`text-lg font-semibold mb-3 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Recharts Dataset:</h3>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setRechartsDataset('dataset1')}
                                 className={`px-4 py-2 rounded font-medium transition-colors ${
                                     rechartsDataset === 'dataset1'
                                         ? 'bg-blue-500 text-white'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : darkTheme
+                                            ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
                                 Dataset 1
@@ -1036,7 +1064,9 @@ const Me: React.FC = () => {
                                 className={`px-4 py-2 rounded font-medium transition-colors ${
                                     rechartsDataset === 'dataset2'
                                         ? 'bg-blue-500 text-white'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : darkTheme
+                                            ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
                                 Dataset 2
@@ -1046,7 +1076,7 @@ const Me: React.FC = () => {
 
                     {/* Recharts Line Visibility Controls */}
                     <div className="mb-4">
-                        <h4 className="text-md font-semibold mb-2">Recharts Visible Lines:</h4>
+                        <h4 className={`text-md font-semibold mb-2 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Recharts Visible Lines:</h4>
                         <div className="flex gap-4 flex-wrap">
                             {getRechartsCurrentLines().map((line) => (
                                 <label key={line.id} className="flex items-center gap-2 cursor-pointer">
@@ -1060,7 +1090,7 @@ const Me: React.FC = () => {
                                         className="w-4 h-0.5" 
                                         style={{ backgroundColor: line.color }}
                                     ></div>
-                                    <span className="text-sm font-medium">{line.name}</span>
+                                    <span className={`text-sm font-medium ${darkTheme ? 'text-gray-200' : 'text-gray-700'}`}>{line.name}</span>
                                 </label>
                             ))}
                         </div>
@@ -1080,19 +1110,20 @@ const Me: React.FC = () => {
                         showLegend={true}
                         responsive={true}
                         animationDuration={800}
+                        darkTheme={darkTheme}
                     />
                 </div>
 
                 {/* Separator */}
-                <div className="border-t border-gray-300 my-12"></div>
+                <div className={`border-t my-12 ${darkTheme ? 'border-gray-600' : 'border-gray-300'}`}></div>
 
                 {/* Visx Section */}
                 <div className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center">Visx Linear Graph</h2>
+                    <h2 className={`text-2xl font-bold mb-6 text-center ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Visx Linear Graph</h2>
                     
                     {/* Visx Time Period Selection */}
                     <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-3">Visx Time Period:</h3>
+                        <h3 className={`text-lg font-semibold mb-3 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Visx Time Period:</h3>
                         <div className="flex gap-3">
                             {(['days', 'weeks', 'months'] as TimePeriod[]).map((period) => (
                                 <button
@@ -1101,7 +1132,9 @@ const Me: React.FC = () => {
                                     className={`px-4 py-2 rounded font-medium transition-colors ${
                                         visxTimePeriod === period
                                             ? 'bg-green-500 text-white'
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            : darkTheme
+                                                ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
                                     {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -1112,14 +1145,16 @@ const Me: React.FC = () => {
 
                     {/* Visx Dataset Selection */}
                     <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-3">Visx Dataset:</h3>
+                        <h3 className={`text-lg font-semibold mb-3 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Visx Dataset:</h3>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setVisxDataset('dataset1')}
                                 className={`px-4 py-2 rounded font-medium transition-colors ${
                                     visxDataset === 'dataset1'
                                         ? 'bg-green-500 text-white'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : darkTheme
+                                            ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
                                 Dataset 1
@@ -1129,7 +1164,9 @@ const Me: React.FC = () => {
                                 className={`px-4 py-2 rounded font-medium transition-colors ${
                                     visxDataset === 'dataset2'
                                         ? 'bg-green-500 text-white'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        : darkTheme
+                                            ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                             >
                                 Dataset 2
@@ -1139,7 +1176,7 @@ const Me: React.FC = () => {
 
                     {/* Visx Line Visibility Controls */}
                     <div className="mb-4">
-                        <h4 className="text-md font-semibold mb-2">Visx Visible Lines:</h4>
+                        <h4 className={`text-md font-semibold mb-2 ${darkTheme ? 'text-white' : 'text-gray-900'}`}>Visx Visible Lines:</h4>
                         <div className="flex gap-4 flex-wrap">
                             {visxDatasets[visxDataset as keyof typeof visxDatasets][visxTimePeriod].map((line) => (
                                 <label key={line.id} className="flex items-center gap-2 cursor-pointer">
@@ -1153,7 +1190,7 @@ const Me: React.FC = () => {
                                         className="w-4 h-0.5" 
                                         style={{ backgroundColor: line.color }}
                                     ></div>
-                                    <span className="text-sm font-medium">{line.name}</span>
+                                    <span className={`text-sm font-medium ${darkTheme ? 'text-gray-200' : 'text-gray-700'}`}>{line.name}</span>
                                 </label>
                             ))}
                         </div>
@@ -1171,7 +1208,7 @@ const Me: React.FC = () => {
                         showTooltip={true}
                         responsive={true}
                         curveType="linear"
-                        backgroundColor="#fafafa"
+                        darkTheme={darkTheme}
                     />
                 </div>
             </div>

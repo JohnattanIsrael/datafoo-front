@@ -108,6 +108,8 @@ interface RechartsLineGraphProps {
   legendWrapperStyle?: React.CSSProperties;                    // Custom legend styling
   responsive?: boolean;                                         // Make chart responsive (default: true)
   animationDuration?: number;                                   // Animation duration in ms (default: 1000)
+  darkTheme?: boolean;                                          // Enable dark theme styling (default: false)
+  backgroundColor?: string;                                     // Background color override
 }
 
 const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
@@ -123,14 +125,16 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
   showGrid = true,
   showTooltip = true,
   showLegend = true,
-  gridStroke = '#e0e0e0',
+  gridStroke,
   gridOpacity = 0.7,
   xTickFormatter,
   yTickFormatter,
   tooltipFormatter,
   legendWrapperStyle,
   responsive = true,
-  animationDuration = 1000
+  animationDuration = 1000,
+  darkTheme = false,
+  backgroundColor
 }) => {
   // Process data: if individual line data is provided, merge it; otherwise use provided data
   const processedData = React.useMemo(() => {
@@ -164,6 +168,15 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
     });
   }, [data, lines]);
 
+  // Define theme colors
+  const themeColors = {
+    background: backgroundColor || (darkTheme ? '#1a1a1a' : '#ffffff'),
+    text: darkTheme ? '#e5e5e5' : '#333333',
+    grid: gridStroke || (darkTheme ? '#404040' : '#e0e0e0'),
+    tooltipBg: darkTheme ? '#2a2a2a' : '#ffffff',
+    tooltipBorder: darkTheme ? '#555555' : '#cccccc'
+  };
+
   // Custom tooltip content
   const CustomTooltip = ({ active, payload, label }: {
     active?: boolean;
@@ -172,7 +185,14 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
+        <div 
+          className="p-3 border rounded shadow-lg"
+          style={{
+            backgroundColor: themeColors.tooltipBg,
+            borderColor: themeColors.tooltipBorder,
+            color: themeColors.text
+          }}
+        >
           <p className="font-semibold">{`${xAxisLabel || 'X'}: ${
             xTickFormatter && label !== undefined ? xTickFormatter(label) : label
           }`}</p>
@@ -203,7 +223,7 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
       {showGrid && (
         <CartesianGrid 
           strokeDasharray="3 3" 
-          stroke={gridStroke}
+          stroke={themeColors.grid}
           opacity={gridOpacity}
         />
       )}
@@ -212,20 +232,39 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
         dataKey="x"
         tickFormatter={xTickFormatter}
         domain={xAxisDomain}
-        label={xAxisLabel ? { value: xAxisLabel, position: 'insideBottom', offset: -10 } : undefined}
+        tick={{ fill: themeColors.text }}
+        axisLine={{ stroke: themeColors.text }}
+        tickLine={{ stroke: themeColors.text }}
+        label={xAxisLabel ? { 
+          value: xAxisLabel, 
+          position: 'insideBottom', 
+          offset: -10,
+          style: { fill: themeColors.text }
+        } : undefined}
       />
       
       <YAxis 
         tickFormatter={yTickFormatter}
         domain={yAxisDomain}
-        label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft' } : undefined}
+        tick={{ fill: themeColors.text }}
+        axisLine={{ stroke: themeColors.text }}
+        tickLine={{ stroke: themeColors.text }}
+        label={yAxisLabel ? { 
+          value: yAxisLabel, 
+          angle: -90, 
+          position: 'insideLeft',
+          style: { fill: themeColors.text }
+        } : undefined}
       />
       
       {showTooltip && <Tooltip content={<CustomTooltip />} />}
       
       {showLegend && (
         <Legend 
-          wrapperStyle={legendWrapperStyle}
+          wrapperStyle={{
+            color: themeColors.text,
+            ...legendWrapperStyle
+          }}
         />
       )}
       
@@ -248,7 +287,16 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
 
   if (responsive) {
     return (
-      <div className="recharts-line-graph-container" style={{ width: '100%', height: height }}>
+      <div 
+        className={`recharts-line-graph-container ${darkTheme ? 'dark-theme' : ''}`}
+        style={{ 
+          width: '100%', 
+          height: height,
+          backgroundColor: themeColors.background,
+          borderRadius: '8px',
+          padding: darkTheme ? '8px' : '0'
+        }}
+      >
         <ResponsiveContainer>
           {ChartComponent}
         </ResponsiveContainer>
@@ -257,7 +305,14 @@ const RechartsLineGraph: React.FC<RechartsLineGraphProps> = ({
   }
 
   return (
-    <div className="recharts-line-graph-container">
+    <div 
+      className={`recharts-line-graph-container ${darkTheme ? 'dark-theme' : ''}`}
+      style={{
+        backgroundColor: themeColors.background,
+        borderRadius: '8px',
+        padding: darkTheme ? '8px' : '0'
+      }}
+    >
       {ChartComponent}
     </div>
   );

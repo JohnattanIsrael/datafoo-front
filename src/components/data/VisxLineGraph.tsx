@@ -105,6 +105,7 @@ interface VisxLineGraphProps {
   backgroundColor?: string;                                        // Chart background color
   responsive?: boolean;                                           // Make chart responsive (default: true)
   curveType?: 'linear' | 'cardinal' | 'monotone';               // Line curve type
+  darkTheme?: boolean;                                            // Enable dark theme styling (default: false)
 }
 
 // Tooltip styles
@@ -129,13 +130,14 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
   yDomain,
   showGrid = true,
   showTooltip = true,
-  gridStroke = '#e1e5e9',
+  gridStroke,
   gridOpacity = 0.6,
   xTickFormatter,
   yTickFormatter,
-  backgroundColor = 'transparent',
+  backgroundColor,
   responsive = true,
-  curveType = 'linear'
+  curveType = 'linear',
+  darkTheme = false
 }) => {
   // Tooltip setup
   const {
@@ -146,6 +148,14 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
     showTooltip: displayTooltip,
     hideTooltip,
   } = useTooltip<VisxDataPoint>();
+
+  // Define theme colors
+  const themeColors = {
+    background: backgroundColor || (darkTheme ? '#1a1a1a' : 'transparent'),
+    text: darkTheme ? '#e5e5e5' : '#333333',
+    grid: gridStroke || (darkTheme ? '#404040' : '#e1e5e9'),
+    axis: darkTheme ? '#666666' : '#333333'
+  };
 
   // Chart content component
   const ChartContent: React.FC<{ width: number; height: number }> = ({ width, height }) => {
@@ -253,7 +263,7 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
 
     return (
       <div style={{ position: 'relative' }}>
-        <svg width={width} height={height} style={{ backgroundColor }}>
+        <svg width={width} height={height} style={{ backgroundColor: themeColors.background }}>
           <rect
             x={0}
             y={0}
@@ -271,7 +281,7 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
                   scale={yScale}
                   width={innerWidth}
                   strokeDasharray="2,2"
-                  stroke={gridStroke}
+                  stroke={themeColors.grid}
                   strokeOpacity={gridOpacity}
                   pointerEvents="none"
                 />
@@ -279,7 +289,7 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
                   scale={xScale}
                   height={innerHeight}
                   strokeDasharray="2,2"
-                  stroke={gridStroke}
+                  stroke={themeColors.grid}
                   strokeOpacity={gridOpacity}
                   pointerEvents="none"
                 />
@@ -320,30 +330,32 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
               scale={xScale}
               top={innerHeight}
               tickFormat={xTickFormatter}
-              stroke="#333"
-              tickStroke="#333"
+              stroke={themeColors.axis}
+              tickStroke={themeColors.axis}
+              tickLabelProps={{fill: themeColors.text}}
               label={xAxisLabel}
               labelProps={{
                 x: innerWidth / 2,
                 y: -10,
                 fontSize: 12,
                 textAnchor: 'middle',
-                fill: '#333'
+                fill: themeColors.text
               }}
             />
             
             <AxisLeft
               scale={yScale}
               tickFormat={yTickFormatter}
-              stroke="#333"
-              tickStroke="#333"
+              stroke={themeColors.axis}
+              tickStroke={themeColors.axis}
+              tickLabelProps={{fill: themeColors.text}}
               label={yAxisLabel}
               labelProps={{
                 x: -40,
                 y: innerHeight / 2,
                 fontSize: 12,
                 textAnchor: 'middle',
-                fill: '#333',
+                fill: themeColors.text,
                 angle: -90
               }}
             />
@@ -370,7 +382,12 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
           <Tooltip
             top={tooltipTop! + margin.top}
             left={tooltipLeft! + margin.left}
-            style={tooltipStyles}
+            style={{
+              ...tooltipStyles,
+              backgroundColor: darkTheme ? '#2a2a2a' : tooltipStyles.backgroundColor,
+              color: themeColors.text,
+              border: `1px solid ${darkTheme ? '#555555' : '#cccccc'}`
+            }}
           >
             <div>
               <strong>
@@ -393,7 +410,16 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
 
   if (responsive && !fixedWidth) {
     return (
-      <div className="visx-line-graph-container" style={{ width: '100%', height }}>
+      <div 
+        className={`visx-line-graph-container ${darkTheme ? 'dark-theme' : ''}`}
+        style={{ 
+          width: '100%', 
+          height,
+          backgroundColor: themeColors.background,
+          borderRadius: '8px',
+          padding: darkTheme ? '8px' : '0'
+        }}
+      >
         <ParentSize>
           {({ width }) => <ChartContent width={width} height={height} />}
         </ParentSize>
@@ -402,7 +428,14 @@ const VisxLineGraph: React.FC<VisxLineGraphProps> = ({
   }
 
   return (
-    <div className="visx-line-graph-container">
+    <div 
+      className={`visx-line-graph-container ${darkTheme ? 'dark-theme' : ''}`}
+      style={{
+        backgroundColor: themeColors.background,
+        borderRadius: '8px',
+        padding: darkTheme ? '8px' : '0'
+      }}
+    >
       <ChartContent width={fixedWidth || 600} height={height} />
     </div>
   );

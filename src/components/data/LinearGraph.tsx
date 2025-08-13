@@ -99,6 +99,8 @@ interface LinearGraphProps {
     yDomain?: [number, number];                               // Custom Y-axis domain [min, max] (default: auto from data)
     gridOpacity?: number;                                     // Opacity of grid lines (0-1, default: 0.7)
     tickSize?: number;                                        // Length of axis tick marks (default: 6)
+    darkTheme?: boolean;                                      // Enable dark theme styling (default: false)
+    backgroundColor?: string;                                 // Background color override
 }
 
 const LinearGraph: React.FC<LinearGraphProps> = ({
@@ -121,7 +123,9 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
     xDomain,
     yDomain,
     gridOpacity = 0.7,
-    tickSize = 6
+    tickSize = 6,
+    darkTheme = false,
+    backgroundColor
 }) => {
     const svgRef = useRef<SVGSVGElement>(null);
 
@@ -157,6 +161,17 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
             .domain(yDomain || d3.extent(allDataPoints, d => d.y) as [number, number]) // Use custom domain or auto-calculate
             .range([innerHeight, 0]); // Inverted because SVG y=0 is at top
 
+        // Set background color based on theme
+        const bgColor = backgroundColor || (darkTheme ? '#1a1a1a' : 'transparent');
+        svg.style('background-color', bgColor);
+        
+        // Define theme colors
+        const themeColors = {
+            text: darkTheme ? '#e5e5e5' : '#333333',
+            axis: darkTheme ? '#666666' : '#333333',
+            grid: darkTheme ? '#404040' : '#e0e0e0'
+        };
+
         // Create main group element with margin offset transform
         const g = svg.append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
@@ -174,7 +189,9 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
                 .attr('class', 'grid')
                 .attr('transform', `translate(0,${innerHeight})`)
                 .call(xGridAxis)
-                .style('opacity', gridOpacity);
+                .style('opacity', gridOpacity)
+                .selectAll('line')
+                .style('stroke', themeColors.grid);
 
             // Vertical grid lines (for X-axis reference)
             const yGridAxis = d3.axisLeft(yScale)
@@ -186,7 +203,9 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
             g.append('g')
                 .attr('class', 'grid')
                 .call(yGridAxis)
-                .style('opacity', gridOpacity);
+                .style('opacity', gridOpacity)
+                .selectAll('line')
+                .style('stroke', themeColors.grid);
         }
 
         // LINE GENERATOR: D3.js line generator function to create SVG path data
@@ -258,7 +277,17 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
         g.append('g')
             .attr('class', 'x-axis')                        // CSS class for styling
             .attr('transform', `translate(0,${innerHeight})`) // Position at bottom
-            .call(xAxis);                                   // Apply axis generator
+            .call(xAxis)                                    // Apply axis generator
+            .selectAll('text')
+            .style('fill', themeColors.text);
+        
+        g.select('.x-axis')
+            .select('.domain')
+            .style('stroke', themeColors.axis);
+        
+        g.select('.x-axis')
+            .selectAll('.tick line')
+            .style('stroke', themeColors.axis);
 
         // Y-AXIS: Create left axis with customizable ticks and formatting
         const yAxis = d3.axisLeft(yScale)
@@ -269,13 +298,24 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
 
         g.append('g')
             .attr('class', 'y-axis')    // CSS class for styling
-            .call(yAxis);               // Apply axis generator
+            .call(yAxis)                // Apply axis generator
+            .selectAll('text')
+            .style('fill', themeColors.text);
+        
+        g.select('.y-axis')
+            .select('.domain')
+            .style('stroke', themeColors.axis);
+        
+        g.select('.y-axis')
+            .selectAll('.tick line')
+            .style('stroke', themeColors.axis);
 
         // X-AXIS LABEL: Add descriptive label below X-axis
         g.append('text')
             .attr('class', 'x-axis-label')  // CSS class for styling
             .attr('transform', `translate(${innerWidth / 2}, ${innerHeight + margin.bottom - 5})`) // Center bottom
             .style('text-anchor', 'middle') // Center text
+            .style('fill', themeColors.text)
             .text(xAxisLabel);              // Label text
 
         // Y-AXIS LABEL: Add descriptive label to the left of Y-axis (rotated)
@@ -286,17 +326,28 @@ const LinearGraph: React.FC<LinearGraphProps> = ({
             .attr('x', 0 - (innerHeight / 2))  // Center vertically
             .attr('dy', '1em')                 // Fine-tune vertical position
             .style('text-anchor', 'middle')    // Center text
+            .style('fill', themeColors.text)
             .text(yAxisLabel);                 // Label text
 
         // Dependencies array: Re-run effect when these props change
-    }, [data, lines, width, height, margin, lineColor, pointColor, pointRadius, showGrid, xAxisLabel, yAxisLabel, customIcons, xTickCount, yTickCount, xTickFormat, yTickFormat, xDomain, yDomain, gridOpacity, tickSize]);
+    }, [data, lines, width, height, margin, lineColor, pointColor, pointRadius, showGrid, xAxisLabel, yAxisLabel, customIcons, xTickCount, yTickCount, xTickFormat, yTickFormat, xDomain, yDomain, gridOpacity, tickSize, darkTheme, backgroundColor]);
+
+    // Calculate background color outside of useEffect
+    const bgColor = backgroundColor || (darkTheme ? '#1a1a1a' : 'transparent');
 
     /**
      * COMPONENT RENDER: Return the SVG container wrapped in a styled div
      * The SVG ref allows D3.js to manipulate the DOM directly
      */
     return (
-        <div className="linear-graph-container">
+        <div 
+            className={`linear-graph-container ${darkTheme ? 'dark-theme' : ''}`}
+            style={{
+                backgroundColor: bgColor,
+                borderRadius: '8px',
+                padding: darkTheme ? '8px' : '0'
+            }}
+        >
             <svg
                 ref={svgRef}                    // React ref for D3.js DOM manipulation
                 width={width}                   // Total SVG width including margins
